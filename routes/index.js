@@ -41,7 +41,7 @@ router.post('/', function(req, res) {
   return res.status(200).end();
 });
 
-router.get('/', function(req, res) {
+router.get('/', ensureAuthenticated, function(req, res) {
   // if some params are specified
   if (req.query.owner || req.query.repository || req.query.ref) {
 
