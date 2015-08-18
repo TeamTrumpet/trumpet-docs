@@ -12,6 +12,7 @@ var ensureAuthenticated = function(req, res, next) {
 };
 
 router.post('/', function(req, res) {
+  // TODO: Add secret parsing
   var repo = req.body.repository.full_name;
   var ref = 'master';
 
