@@ -15,16 +15,25 @@ router.post('/', function(req, res) {
   var repo = req.body.repository.full_name;
   var ref = 'master';
 
+  // if the push event has a ref
   if (req.body.ref) {
+    // Example Procedure
+    // req.body.ref === 'refs/heads/develop'
+    // refsplit = ['refs', 'heads', 'develop']
+    // ref = 'develop'
     var refsplit = req.body.ref.split('/');
 
+    // and it has three components
     if (refsplit.length == 3) {
+      // then we'll update our ref to that last piece
       ref = refsplit[2];
     }
   }
 
+  // build our cache key
   var CACHE_KEY = repo + '?ref=' + ref;
 
+  // and delete the cache element
   cache.del(CACHE_KEY);
 
   console.log("CACHE CLEARED " + CACHE_KEY);
