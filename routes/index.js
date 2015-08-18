@@ -51,6 +51,9 @@ router.get('/docs/:owner/:repository', ensureAuthenticated, function(req, res, n
             return res.status(500);
           }
 
+          // ensure all assets are https
+          html = html.replace(/http\:\/\//g, 'https://');
+
           cache.put(CACHE_KEY, html);
           console.log("CACHE POPULATED");
 
