@@ -13,10 +13,21 @@ var ensureAuthenticated = function(req, res, next) {
 
 router.post('/', function(req, res) {
   var repo = req.body.repository.full_name;
+  var ref = 'master';
 
-  cache.del(repo);
+  if (req.body.ref) {
+    var refsplit = req.body.ref.split('/');
 
-  console.log("CACHE CLEARED " + repo);
+    if (refsplit.length == 3) {
+      ref = refsplit[2];
+    }
+  }
+
+  var CACHE_KEY = repo + '?ref=' + ref;
+
+  cache.del(CACHE_KEY);
+
+  console.log("CACHE CLEARED " + CACHE_KEY);
 
   return res.status(200).end();
 });
@@ -24,11 +35,18 @@ router.post('/', function(req, res) {
 router.get('/docs/:owner/:repository', ensureAuthenticated, function(req, res, next) {
 
   var repo = req.params.owner + '/' + req.params.repository;
+  var ref = 'master';
 
-  var html = cache.get(repo);
+  if (req.query.ref) {
+    ref = req.query.ref;
+  }
+
+  var CACHE_KEY = repo + '?ref=' + ref;
+
+  var html = cache.get(CACHE_KEY);
 
   if (html) {
-    console.log("CACHE GET " + repo);
+    console.log("CACHE GET " + CACHE_KEY);
     return res.send(html);
   } else {
     var client = github.client(process.env.GITHUB_TOKEN);
@@ -56,8 +74,8 @@ router.get('/docs/:owner/:repository', ensureAuthenticated, function(req, res, n
           // ensure all assets are https
           html = html.replace(/http\:\/\//g, 'https://');
 
-          cache.put(repo, html);
-          console.log("CACHE POPULATED " + repo);
+          cache.put(CACHE_KEY, html);
+          console.log("CACHE POPULATED " + CACHE_KEY);
 
           return res.send(html);
       });
