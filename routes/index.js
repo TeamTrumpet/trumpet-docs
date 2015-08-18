@@ -14,24 +14,28 @@ var ensureAuthenticated = function(req, res, next) {
 };
 
 router.post('/', function(req, res) {
-  cache.del(CACHE_KEY);
+  var repo = req.body.repository.full_name;
 
-  console.log("CACHE CLEARED");
+  cache.del(repo);
+
+  console.log("CACHE CLEARED " + repo);
 
   return res.status(200).end();
 });
 
 router.get('/docs/:owner/:repository', ensureAuthenticated, function(req, res, next) {
 
-  var html = cache.get(CACHE_KEY);
+  var repo = req.params.owner + '/' + req.params.repository;
+
+  var html = cache.get(repo);
 
   if (html) {
-    console.log("CACHE GET");
+    console.log("CACHE GET " + repo);
     return res.send(html);
   } else {
     var client = github.client(process.env.GITHUB_TOKEN);
 
-    var ghrepo = client.repo(req.params.owner + '/' + req.params.repository);
+    var ghrepo = client.repo(repo);
 
     ghrepo.contents(process.env.DOCS_PATH, function(err, data) {
       if (err) {
@@ -55,7 +59,7 @@ router.get('/docs/:owner/:repository', ensureAuthenticated, function(req, res, n
           html = html.replace(/http\:\/\//g, 'https://');
 
           cache.put(CACHE_KEY, html);
-          console.log("CACHE POPULATED");
+          console.log("CACHE POPULATED " + repo);
 
           return res.send(html);
       });
