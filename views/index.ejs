@@ -1,11 +1,25 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title><%= title %></title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
-  </head>
+  <head></head>
   <body>
-    <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>
+
+    <% if (error) { %>
+      <span style="color: red;">All fields are required</span>
+    <% } %>
+
+    <form>
+      <label for="owner">Owner</label>
+      <input type="text" name="owner" value="<%= owner %>">
+      <label for="repository">Repository</label>
+      <input type="text" name="repository" value="<%= repository %>">
+      <label for="ref">Ref (Example "master" or "develop" or "v1.0.0")</label>
+      <input type="text" name="ref" value="<%= ref %>">
+
+      <input type="submit" value="Open Docs">
+    </form>
+
+    <script type="text/javascript">
+
+    </script>
   </body>
 </html>

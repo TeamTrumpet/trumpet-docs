@@ -41,6 +41,30 @@ router.post('/', function(req, res) {
   return res.status(200).end();
 });
 
+router.get('/', function(req, res) {
+  // if some params are specified
+  if (req.query.owner || req.query.repository || req.query.ref) {
+
+    // then check if all are specified
+    if (req.query.owner && req.query.repository && req.query.ref) {
+      // if they are, then send them on to the docs
+      return res.redirect('/docs/' + req.query.owner + '/' + req.query.repository + '?ref=' + req.query.ref);
+    }
+
+    var owner = process.env.DEFAULT_OWNER;
+
+    if (req.query.owner) {
+      owner = req.query.owner;
+    }
+
+    // otherwise, there's an issue
+    return res.render('index', { error: true, owner: owner, repository: req.query.repository, ref: req.query.ref });
+
+  }
+
+  return res.render('index', { error: false, owner: process.env.DEFAULT_OWNER, repository: "", ref: "master" });
+});
+
 router.get('/docs/:owner/:repository', ensureAuthenticated, function(req, res, next) {
 
   var repo = req.params.owner + '/' + req.params.repository;
@@ -62,17 +86,21 @@ router.get('/docs/:owner/:repository', ensureAuthenticated, function(req, res, n
 
     var ghrepo = client.repo(repo);
 
-    ghrepo.contents(process.env.DOCS_PATH, function(err, data) {
+    ghrepo.contents(process.env.DOCS_PATH, ref, function(err, data) {
       if (err) {
-        res.json(err);
+        if (err.statusCode === 404) {
+          console.log("Not Found: " + CACHE_KEY);
+          return res.status(404).send("Not found");
+        }
+
+        console.error(err);
+        res.status(500).send("An error occured.");
         return;
       }
 
       var blueprint = new Buffer(data.content, 'base64').toString('utf8');
 
-      var options = {
-
-      };
+      var options = {};
 
       aglio.render(blueprint, options, function(err, html) {
           if (err) {
