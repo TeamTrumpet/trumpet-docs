@@ -4,8 +4,6 @@ var aglio = require('aglio');
 var github = require('octonode');
 var cache = require('memory-cache');
 
-var CACHE_KEY = 'documentation-html';
-
 var ensureAuthenticated = function(req, res, next) {
   if (req.isAuthenticated())
     return next();
@@ -58,7 +56,7 @@ router.get('/docs/:owner/:repository', ensureAuthenticated, function(req, res, n
           // ensure all assets are https
           html = html.replace(/http\:\/\//g, 'https://');
 
-          cache.put(CACHE_KEY, html);
+          cache.put(repo, html);
           console.log("CACHE POPULATED " + repo);
 
           return res.send(html);
