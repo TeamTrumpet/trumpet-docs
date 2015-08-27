@@ -12,6 +12,13 @@ var ensureAuthenticated = function(req, res, next) {
 };
 
 router.post('/', function(req, res) {
+  // if it queried for all keys to be deleted
+  if (req.query.all) {
+    cache.clear();
+    console.log("CACHE CLEARED <ALL KEYS>");
+    return res.status(204).end();
+  }
+
   // TODO: Add secret parsing
   var repo = req.body.repository.full_name;
   var ref = 'master';
