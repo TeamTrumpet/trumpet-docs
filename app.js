@@ -10,11 +10,12 @@ var _ = require('lodash');
 var helmet = require('helmet');
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 
+var ALLOWED_ADDRESSES = process.env.ALLOWED_ADDRESSES.split(',');
+
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CONSUMER_KEY,
     clientSecret: process.env.GOOGLE_CONSUMER_SECRET,
-    callbackURL: 'https://' + process.env.HOSTED_DOMAIN + '/auth/google/return',
-    hostedDomain: process.env.EMAIL_DOMAIN // added, but could be stripped via a client side MITM attack
+    callbackURL: 'https://' + process.env.HOSTED_DOMAIN + '/auth/google/return'
   },
   function(identifier, err, profile, done) {
     if (err) {
@@ -33,7 +34,7 @@ passport.use(new GoogleStrategy({
     });
 
     // if it ends with the string
-    if (email.value.endsWith('@' + process.env.EMAIL_DOMAIN)) {
+    if (email.value.endsWith('@' + process.env.EMAIL_DOMAIN) || ALLOWED_ADDRESSES.indexOf(email.value) >= 0) {
       console.log('LOGGED IN USER ' + email.value + '.');
 
       // then log them in
@@ -43,7 +44,7 @@ passport.use(new GoogleStrategy({
     // otherwise flip out
     else {
       // about their invalid domain
-      return done(new Error('Invalid domain.'));
+      return done(new Error('Invalid user.'));
     }
   }
 ));
@@ -107,8 +108,7 @@ app.get('/auth/google', function(req, res, next) {
   req.session.next = req.query.next;
   next();
 }, passport.authenticate('google', {
-  scope: scope,
-  hostedDomain: process.env.EMAIL_DOMAIN
+  scope: scope
 }));
 
 // Google will redirect the user to this URL after authentication.  Finish
@@ -116,7 +116,6 @@ app.get('/auth/google', function(req, res, next) {
 // logged in.  Otherwise, authentication has failed.
 app.get('/auth/google/return', passport.authenticate('google', {
   scope: scope,
-  hostedDomain: process.env.EMAIL_DOMAIN,
   failureRedirect: '/failed'
 }), function(req, res) {
   res.redirect(req.session.next);
