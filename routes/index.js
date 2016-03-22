@@ -63,14 +63,14 @@ router.get('/', ensureAuthenticated, function(req, res) {
   return res.render('index', { error: false, owner: process.env.DEFAULT_OWNER, repository: "", ref: "master" });
 });
 
-var generateCacheKey = (repo, ref, docs_path) => `${repo}?ref=${ref}&docs_path=${docs_path ? docs_path : process.env.DOCS_PATH}`;
+var generateCacheKey = (repo, ref) => `${repo}?ref=${ref}`;
 
-var generateDocsHTML = (repo, ref, docs_path) => (callback) => {
+var generateDocsHTML = (repo, ref) => (callback) => {
   var client = github.client(process.env.GITHUB_TOKEN);
 
   var ghrepo = client.repo(repo);
 
-  ghrepo.contents(docs_path ? docs_path : process.env.DOCS_PATH, ref, function(err, data) {
+  ghrepo.contents(process.env.DOCS_PATH, ref, function(err, data) {
     if (err) {
       return callback(err);
     }
