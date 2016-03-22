@@ -115,26 +115,30 @@ router.post('/', function(req, res) {
     return res.status(204).end();
   }
 
-  var repo = req.body.repository.full_name;
-  var ref = 'master';
+  if (req.get('X-GitHub-Event') === 'push') {
 
-  // if the push event has a ref
-  if (req.body.ref) {
-    // Example Procedure
-    // req.body.ref === 'refs/heads/develop'
-    // refsplit = ['refs', 'heads', 'develop']
-    // ref = 'develop'
-    var refsplit = req.body.ref.split('/');
+    var repo = req.body.repository.full_name;
+    var ref = 'master';
 
-    // and it has three components
-    if (refsplit.length == 3) {
-      // then we'll update our ref to that last piece
-      ref = refsplit[2];
+    // if the push event has a ref
+    if (req.body.ref) {
+      // Example Procedure
+      // req.body.ref === 'refs/heads/develop'
+      // refsplit = ['refs', 'heads', 'develop']
+      // ref = 'develop'
+      var refsplit = req.body.ref.split('/');
+
+      // and it has three components
+      if (refsplit.length == 3) {
+        // then we'll update our ref to that last piece
+        ref = refsplit[2];
+      }
     }
-  }
 
-  // and delete the cache element
-  cache.del(generateCacheKey(repo, ref));
+    // and delete the cache element
+    cache.del(generateCacheKey(repo, ref));
+
+  }
 
   return res.status(200).end();
 });
