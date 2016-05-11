@@ -33,8 +33,6 @@ cache.wrap = function(key, work, done) {
 };
 
 var ensureAuthenticated = function(req, res, next) {
-  return next();
-
   if (req.isAuthenticated())
     return next();
   else
