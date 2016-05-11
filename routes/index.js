@@ -132,9 +132,7 @@ router.get('/docs/:owner/:repository', ensureAuthenticated, loadRepoDetails, fun
 });
 
 router.get('/swagger/docs/:owner/:repository/swagger.yaml', ensureAuthenticated, loadRepoDetails, (req, res, next) => {
-  var retriever = retrieveDoc(req.repo, req.ref, 'swagger.yaml');
-
-  retriever((err, doc) => {
+  cache.wrap(generateSwaggerCacheKey(req.repo, req.ref), retrieveDoc(req.repo, req.ref, 'swagger.yaml'), (err, doc) => {
     if (err) {
       return next(err);
     }
@@ -175,11 +173,11 @@ router.post('/', function(req, res) {
         ref = refsplit[2];
       }
     }
-
-    // and delete the cache element
-    cache.del(generateCacheKey(repo, ref));
-    cache.del(generateSwaggerCacheKey(repo, ref));
   }
+
+  // and delete the cache element
+  cache.del(generateCacheKey(repo, ref));
+  cache.del(generateSwaggerCacheKey(repo, ref));
 
   return res.status(200).end();
 });
