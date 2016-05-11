@@ -15,7 +15,7 @@
       <label for="ref">Ref (Example "master" or "develop" or "v1.0.0")</label>
       <input type="text" name="ref" value="<%= ref %>">
       <label for="swagger">Swagger</label>
-      <input type="checkbox" name="swagger">
+      <input type="checkbox" name="swagger" <%= swagger ? "checked" : "" %>>
 
       <input type="submit" value="Open Docs">
     </form>

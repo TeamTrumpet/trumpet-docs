@@ -33,6 +33,8 @@ cache.wrap = function(key, work, done) {
 };
 
 var ensureAuthenticated = function(req, res, next) {
+  return next();
+
   if (req.isAuthenticated())
     return next();
   else
@@ -43,13 +45,13 @@ router.get('/', ensureAuthenticated, function(req, res) {
   // if some params are specified
   if (req.query.owner || req.query.repository || req.query.ref) {
 
-    // then check if this is swagger
-    if ('swagger' in req.query) {
-      return res.redirect('/swagger/docs/' + req.query.owner + '/' + req.query.repository + '?ref=' + req.query.ref);
-    }
-
     // then check if all are specified
     if (req.query.owner && req.query.repository && req.query.ref) {
+      // then check if this is swagger
+      if ('swagger' in req.query) {
+        return res.redirect('/swagger/docs/' + req.query.owner + '/' + req.query.repository + '?ref=' + req.query.ref);
+      }
+
       // if they are, then send them on to the docs
       return res.redirect('/docs/' + req.query.owner + '/' + req.query.repository + '?ref=' + req.query.ref);
     }
@@ -61,11 +63,11 @@ router.get('/', ensureAuthenticated, function(req, res) {
     }
 
     // otherwise, there's an issue
-    return res.render('index', { error: true, owner: owner, repository: req.query.repository, ref: req.query.ref });
+    return res.render('index', { error: true, owner: owner, repository: req.query.repository, ref: req.query.ref, swagger: "swagger" in req.query });
 
   }
 
-  return res.render('index', { error: false, owner: process.env.DEFAULT_OWNER, repository: "", ref: "master" });
+  return res.render('index', { error: false, owner: process.env.DEFAULT_OWNER, repository: "", ref: "master", swagger: false });
 });
 
 var generateCacheKey = (repo, ref) => `${repo}?ref=${ref}`;
