@@ -134,7 +134,9 @@ router.get('/docs/:owner/:repository', ensureAuthenticated, loadRepoDetails, fun
 });
 
 router.get('/swagger/docs/:owner/:repository/swagger.yaml', ensureAuthenticated, loadRepoDetails, (req, res, next) => {
-  cache.wrap(`swagger/${req.repo}?ref=${req.ref}`, retrieveDoc(req.repo, req.ref, 'swagger.yaml'), (err, doc) => {
+  var retriever = retrieveDoc(req.repo, req.ref, 'swagger.yaml');
+
+  retriever((err, doc) => {
     if (err) {
       return next(err);
     }
