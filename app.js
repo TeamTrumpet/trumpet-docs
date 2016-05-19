@@ -105,7 +105,7 @@ var scope = [
 // will redirect the user back to the application at
 //     /auth/google/return
 app.get('/auth/google', function(req, res, next) {
-  req.session.next = req.query.next;
+  req.session.next = decodeURIComponent(req.query.next);
   next();
 }, passport.authenticate('google', {
   scope: scope

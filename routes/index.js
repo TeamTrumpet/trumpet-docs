@@ -36,7 +36,7 @@ var ensureAuthenticated = function(req, res, next) {
   if (req.isAuthenticated())
     return next();
   else
-    return res.redirect('/auth/google?next=' + req.url);
+    return res.redirect('/auth/google?next=' + encodeURIComponent(req.url));
 };
 
 router.get('/', ensureAuthenticated, function(req, res) {
